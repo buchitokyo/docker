@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  # appコンテナ作成
+  app:
+    build:
+      # contextでDokcerfileの場所を指定
+      context: ./docker/php
+      # argsを引数でビルド時に変数を渡す
+      args:
+        - TZ=${TZ}
+    tty: true
+    # ホスト側パス:コンテナのパス
+    volumes:
+      - ./src:/var/www
+      - ./logs:/var/log/php
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    # コンテナ実行時の作業ディレクトリを指定する
+    working_dir: /var/www
+    # 環境変数指定
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=
+      - TZ=${TZ}
+ # webコンテナ
+  web:
+    image: nginx:1.20-alpine # nginx:1.20-alpine
+    # 起動順序を制御するためのオプション
+    depends_on:
+      - app
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src:/var/www
+      - ./logs:/var/log/nginx
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      - TZ=${TZ}
+  # dbコンテナ
+  db:
+    image: mysql:8.0
+    volumes:
+      - db-store:/var/lib/mysql
+      - ./logs:/var/log/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+    ports:
+      - 3306:3306
+# volumes を定義する
+volumes:
+  # volume の名前を指定
+  db-store:
