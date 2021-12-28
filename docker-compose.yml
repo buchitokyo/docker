@@ -1,7 +1,9 @@
 version: '3.9'
-
+# volumes を定義する
+volumes:
+  php-fpm-socket:
+  db-store:
 services:
-  # appコンテナ作成
   app:
     build:
       # contextでDokcerfileの場所を指定
@@ -9,26 +11,19 @@ services:
       # argsを引数でビルド時に変数を渡す
       args:
         - TZ=${TZ}
-    tty: true
     # ホスト側パス:コンテナのパス
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/php
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/php/php-fpm.d/zzz-www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
+      - php-fpm-socket:/var/run/php-fpm
     # コンテナ実行時の作業ディレクトリを指定する
     working_dir: /var/www
-    # 環境変数指定
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USER}
-      - DB_PASSWORD=
-      - TZ=${TZ}
- # webコンテナ
+    depends_on:
+      - db
   web:
-    image: nginx:1.20-alpine # nginx:1.20-alpine
-    # 起動順序を制御するためのオプション
+    image: nginx:1.20-alpine
     depends_on:
       - app
     ports:
@@ -37,9 +32,9 @@ services:
       - ./src:/var/www
       - ./logs:/var/log/nginx
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - php-fpm-socket:/var/run/php-fpm
     environment:
       - TZ=${TZ}
-  # dbコンテナ
   db:
     image: mysql:8.0
     volumes:
@@ -53,8 +48,4 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_PASS}
       - TZ=${TZ}
     ports:
-      - 3306:3306
-# volumes を定義する
-volumes:
-  # volume の名前を指定
-  db-store:
+      - 3307:3306

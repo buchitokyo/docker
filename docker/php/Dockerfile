@@ -1,5 +1,5 @@
 # ベースイメージ
-FROM php:7.4-cli-alpine3.13
+FROM php:7.4.27-fpm-alpine3.15
 # 生成するイメージのAuthor（作者）を指定
 LABEL maintainer "kawabuchi"
 
@@ -71,6 +71,7 @@ RUN set -eux && \
   pecl install \
   imagick \
   redis && \
+  mkdir /var/run/php-fpm && \
   docker-php-ext-enable imagick && \
   # prdでは入れない(debug)
   # pecl install xdebug && \
