@@ -18,6 +18,7 @@ services:
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
       - ./docker/php/php-fpm.d/zzz-www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
       - php-fpm-socket:/var/run/php-fpm
+    tty: true
     # コンテナ実行時の作業ディレクトリを指定する
     working_dir: /var/www
     depends_on:
