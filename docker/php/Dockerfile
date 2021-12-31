@@ -1,4 +1,7 @@
 # ベースイメージ
+# node version 指定する際は
+# FROM node:12.13.0-alpine as node
+
 FROM php:7.4.27-fpm-alpine3.15
 # 生成するイメージのAuthor（作者）を指定
 LABEL maintainer "kawabuchi"
@@ -7,12 +10,16 @@ ARG TZ
 
 # php fpm install alpineでなければ、apt-get
 RUN apk add --no-cache bash wget
-RUN apk add --no-cache yarn npm nodejs
-# RUN apk add nodejs --repository="http://dl-cdn.alpinelinux.org/alpine/v3.11/main/"
-# ENV NODE /usr/local/bin/node \
-#   && echo "NodeJS Version:" "$(node -v)" \
-#   && echo "NPM Version:" "$(npm -v)"
 
+# node version 指定する際は
+# COPY --from=node /usr/local/bin/node /usr/local/bin/
+# COPY --from=node /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+# RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
+#     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+#     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npx
+
+# npm yarn nodejs
+RUN apk add --no-cache yarn npm nodejs
 # npm
 # RUN npm install n -g
 # ENV N /usr/local/bin/n
@@ -119,6 +126,7 @@ RUN chown -R www-data $COMPOSER_HOME
 # RUN chown -R root:www-data $COMPOSER_HOME
 
 WORKDIR /var/www
+
 # RUN apk --no-cache add shadow && adduser -D -H -u ${ID} -s /bin/bash ${USER_NAME} -G ${USER_NAME} && \
 #     gpasswd -a $USER_NAME sudo && \
 #     echo "${USER_NAME}:${PASSWD}" | chpasswd && \
