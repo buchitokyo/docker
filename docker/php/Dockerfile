@@ -1,8 +1,5 @@
 # ベースイメージ
-# node version 指定する際は
-# FROM node:12.13.0-alpine as node
-
-FROM php:7.4.27-fpm-alpine3.15
+FROM php:8.0-fpm-alpine3.15
 # 生成するイメージのAuthor（作者）を指定
 LABEL maintainer "kawabuchi"
 
@@ -11,19 +8,8 @@ ARG TZ
 # php fpm install alpineでなければ、apt-get
 RUN apk add --no-cache bash wget
 
-# node version 指定する際は
-# COPY --from=node /usr/local/bin/node /usr/local/bin/
-# COPY --from=node /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
-# RUN ln -s /usr/local/bin/node /usr/local/bin/nodejs \
-#     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
-#     && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npx
-
 # npm yarn nodejs
 RUN apk add --no-cache yarn npm nodejs
-# npm
-# RUN npm install n -g
-# ENV N /usr/local/bin/n
-# n 12
 RUN npm install -g @vue/cli
   # npm install -g npm@latest \
 
@@ -44,17 +30,17 @@ RUN set -eux && \
   zlib-dev \
   pcre-dev \
   autoconf \
-  build-base \
-  # gcc \
-  # g++ \
-  # make \
+  # build-base \
+  gcc \
+  g++ \
+  make \
   openssl \
   openssh \
   vim \
   libzip-dev \
   zip \
   imagemagick \
-  imagemagick-libs \
+  # imagemagick-libs \
   imagemagick-dev \
   su-exec \
   git
@@ -64,49 +50,51 @@ RUN apk add --update-cache --no-cache --virtual=.build-dependencies tzdata && \
 
 RUN apk del .build-dependencies
 
-RUN docker-php-ext-install -j$(nproc) \
-  exif \
-  pcntl \
-  iconv \
-  intl \
-  mbstring \
-  sockets \
-  ctype \
-  json \
-  bcmath \
-  curl \
-  dom \
-  pdo \
-  simplexml \
-  zip \
-  opcache \
-  gd \
-  # pdo_pgsql \
-  mysqli \
-  pdo_mysql
+# すでにimageに入ってる
+# RUN docker-php-ext-install -j$(nproc) \
+#   exif \
+#   pcntl \
+#   iconv \
+#   intl \
+#   mbstring \
+#   sockets \
+#   ctype \
+#   json \
+#   bcmath \
+#   curl \
+#   dom \
+#   pdo \
+#   simplexml \
+#   zip \
+#   opcache \
+#   gd \
+#   # pdo_pgsql \
+#   mysqli \
+#   pdo_mysql
 
-  # RUN docker-php-ext-configure zip --with-libzip && \
-  # docker-php-ext-install zip &&\
+#   # RUN docker-php-ext-configure zip --with-libzip && \
+#   # docker-php-ext-install zip &&\
 
 RUN pecl install \
   imagick \
   redis
-  # mongodb \
-  # && echo "extension=mongo.so" > /usr/local/etc/php/conf.d/mongo.ini
+#   # mongodb \
+#   # && echo "extension=mongo.so" > /usr/local/etc/php/conf.d/mongo.ini
 
 RUN mkdir /var/run/php-fpm
 
-RUN docker-php-ext-enable imagick && \
-  # prdでは入れない(debug)
-  # pecl install xdebug && \
-  # docker-php-ext-enable xdebug && \
-  docker-php-ext-configure gd \
-    --with-freetype=/usr/include/ \
-    --with-jpeg=/usr/include/
+RUN docker-php-ext-enable imagick \
+  && rm -rf /tmp/* /var/cache/apk/*
+#   # prdでは入れない(debug)
+#   # pecl install xdebug && \
+#   # docker-php-ext-enable xdebug && \
+#   docker-php-ext-configure gd \
+#     --with-freetype=/usr/include/ \
+#     --with-jpeg=/usr/include/
     # --with-png=/usr/include/ && no more \
 
-RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv \
-  rm -rf /tmp/*
+# RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv \
+#   rm -rf /tmp/*
 
 # Install composer
 ENV COMPOSER_HOME /composer
