@@ -26,8 +26,6 @@ services:
   web:
     build:
       context: ./docker/nginx
-    depends_on:
-      - app
     ports:
       - 8000:8000
     volumes:
@@ -38,6 +36,10 @@ services:
       - php-fpm-socket:/var/run/php-fpm
     environment:
       - TZ=${TZ}
+    links:
+      - app
+    depends_on:
+      - app
   db:
     image: mysql:8.0
     volumes:
@@ -52,3 +54,17 @@ services:
       - TZ=${TZ}
     ports:
       - 3307:3306
+  front_app:
+    build:
+      # context: .
+      dockerfile: ./docker/node/Dockerfile
+      args:
+        - TZ=${TZ}
+    volumes:
+      - ./src/client:/var/www/client
+    ports:
+      - 3000:3000
+    links:
+      - web
+    depends_on:
+      - web

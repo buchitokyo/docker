@@ -81,8 +81,6 @@ RUN pecl install \
 #   # mongodb \
 #   # && echo "extension=mongo.so" > /usr/local/etc/php/conf.d/mongo.ini
 
-RUN mkdir /var/run/php-fpm
-
 RUN docker-php-ext-enable imagick \
   && rm -rf /tmp/* /var/cache/apk/*
 #   # prdでは入れない(debug)
@@ -120,8 +118,18 @@ WORKDIR /var/www
 #     echo "${USER_NAME}:${PASSWD}" | chpasswd && \
 #     echo "${USER_NAME} ALL=(ALL) ALL" >> /etc/sudoers
 
+RUN set -x ; \
+  addgroup -g 82 -S www-data ; \
+  adduser -u 82 -D -S -G www-data www-data ; \
+  echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1
+
+RUN mkdir -p /var/run/php-fpm
+RUN mkdir -p /var/log/nginx
+RUN mkdir -p /var/cache/nginx
+
 RUN chown -R www-data:www-data /var/www/ \
   && chown -R www-data:www-data /var/run/ \
   && chown -R www-data:www-data /var/log/
 
-USER www-data
+# USER www-data
