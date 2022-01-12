@@ -1,8 +1,9 @@
 FROM node:14.18.0-alpine
+
 RUN mkdir -p /var/www/client
 # timezone
 ARG TZ
-WORKDIR /var/www/client
+WORKDIR /var/www
 # COPY ./src/client/ /var/www/client
 
 RUN apk update && \

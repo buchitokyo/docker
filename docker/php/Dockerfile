@@ -6,6 +6,8 @@ LABEL maintainer "kawabuchi"
 ARG TZ
 
 # php fpm install alpineでなければ、apt-get
+RUN set -ex && apk --no-cache add sudo
+
 RUN apk add --no-cache bash wget
 
 # npm yarn nodejs
@@ -118,12 +120,6 @@ WORKDIR /var/www
 #     echo "${USER_NAME}:${PASSWD}" | chpasswd && \
 #     echo "${USER_NAME} ALL=(ALL) ALL" >> /etc/sudoers
 
-RUN set -x ; \
-  addgroup -g 82 -S www-data ; \
-  adduser -u 82 -D -S -G www-data www-data ; \
-  echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1
-
 RUN mkdir -p /var/run/php-fpm
 RUN mkdir -p /var/log/nginx
 RUN mkdir -p /var/cache/nginx
@@ -132,4 +128,4 @@ RUN chown -R www-data:www-data /var/www/ \
   && chown -R www-data:www-data /var/run/ \
   && chown -R www-data:www-data /var/log/
 
-# USER www-data
+USER www-data
