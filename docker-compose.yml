@@ -1,17 +1,23 @@
 version: '3.9'
-# volumes を定義する
-volumes:
-  php-fpm-socket:
-  db-store:
+
 services:
   app:
     build:
-      # contextでDokcerfileの場所を指定
       context: ./docker/php
-      # argsを引数でビルド時に変数を渡す
       args:
         - TZ=${TZ}
-    # ホスト側パス:コンテナのパス
+        - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_DRIVER=redis
+      - REDIS_HOST=redis
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/php
@@ -19,15 +25,15 @@ services:
       - ./docker/php/php-fpm.d/zzz-www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
       - php-fpm-socket:/var/run/php-fpm
     tty: true
-    # コンテナ実行時の作業ディレクトリを指定する
     working_dir: /var/www
     depends_on:
       - db
+
   web:
     build:
       context: ./docker/nginx
     ports:
-      - 8000:8000
+      - ${LOCAL_IP}:8000:8000
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/nginx
@@ -40,8 +46,10 @@ services:
       - app
     depends_on:
       - app
+
   db:
-    image: mysql:8.0
+    platform: linux/x86_64
+    image: mysql:8.0.28
     volumes:
       - db-store:/var/lib/mysql
       - ./logs:/var/log/mysql
@@ -53,7 +61,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_PASS}
       - TZ=${TZ}
     ports:
-      - 3307:3306
+      - ${LOCAL_IP}:3306:3306
+
   front_app:
     build:
       # context: .
@@ -63,8 +72,21 @@ services:
     volumes:
       - ./src/client:/var/www/client
     ports:
-      - 3000:3000
+      - ${LOCAL_IP}:3000:3000
     links:
       - web
     depends_on:
       - web
+
+  redis:
+    image: redis:6.2-alpine3.15
+    volumes:
+      - redis-store:/data
+
+volumes:
+  php-fpm-socket:
+    driver: local
+  db-store:
+    driver: local
+  redis-store:
+    driver: local
