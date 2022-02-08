@@ -28,6 +28,9 @@ services:
     working_dir: /var/www
     depends_on:
       - db
+    networks:
+      - default
+      - app_network
 
   web:
     build:
@@ -46,6 +49,9 @@ services:
       - app
     depends_on:
       - app
+    networks:
+      - default
+      - app_network
 
   db:
     platform: linux/x86_64
@@ -62,6 +68,9 @@ services:
       - TZ=${TZ}
     ports:
       - ${LOCAL_IP}:3306:3306
+    networks:
+      - default
+      - app_network
 
   front_app:
     build:
@@ -77,11 +86,21 @@ services:
       - web
     depends_on:
       - web
+    networks:
+      - default
+      - app_network
 
   redis:
     image: redis:6.2-alpine3.15
     volumes:
       - redis-store:/data
+    networks:
+      - default
+      - app_network
+
+networks:
+  app_network:
+    external: true
 
 volumes:
   php-fpm-socket:

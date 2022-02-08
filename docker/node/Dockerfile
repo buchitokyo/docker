@@ -1,15 +1,15 @@
 FROM node:14.18.0-alpine
 
-# RUN mkdir -p /var/www/client
+RUN mkdir -p /var/www/client
 # # timezone
-# ARG TZ
-WORKDIR /var/www/html/client
-# COPY ./src/client/ /var/www/client
+ARG TZ
+WORKDIR /var/www/client
+COPY ./src/client/ /var/www/client
 
 RUN apk update && \
-    apk add --no-cache make gcc g++ python
-    # && \
-    # yarn install
+    apk add --no-cache make gcc g++ && \
+    # python3 && \
+    yarn install
 
 EXPOSE 3000
 
