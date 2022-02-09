@@ -79,7 +79,7 @@ services:
       args:
         - TZ=${TZ}
     volumes:
-      - ./src/html/client:/var/www/html/client
+      - ./src/client:/var/www/client
     ports:
       - ${LOCAL_IP}:3000:3000
     links:

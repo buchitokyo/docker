@@ -7,9 +7,9 @@ WORKDIR /var/www/client
 COPY ./src/client/ /var/www/client
 
 RUN apk update && \
-    apk add --no-cache make gcc g++ && \
-    # python3 && \
-    yarn install
+    apk add --no-cache make gcc g++ python
+    # python && \
+RUN yarn install
 
 EXPOSE 3000
 
