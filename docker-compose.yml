@@ -37,6 +37,7 @@ services:
       context: ./docker/nginx
     ports:
       - ${LOCAL_IP}:8000:8000
+      - ${LOCAL_IP}:8080:8080
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/nginx
@@ -75,13 +76,31 @@ services:
   front_app:
     build:
       # context: .
-      dockerfile: ./docker/node/Dockerfile
+      dockerfile: ./docker/node/client/Dockerfile
       args:
         - TZ=${TZ}
     volumes:
-      - ./src/client:/var/www/client
+      - ./src/nuxt/client:/var/www/nuxt/client
     ports:
       - ${LOCAL_IP}:3000:3000
+    links:
+      - web
+    depends_on:
+      - web
+    networks:
+      - default
+      - app_network
+
+  admin_front_app:
+    build:
+      # context: .
+      dockerfile: ./docker/node/admin/Dockerfile
+      args:
+        - TZ=${TZ}
+    volumes:
+      - ./src/nuxt/admin:/var/www/nuxt/admin
+    ports:
+      - ${LOCAL_IP}:3001:3001
     links:
       - web
     depends_on:
@@ -94,6 +113,16 @@ services:
     image: redis:6.2-alpine3.15
     volumes:
       - redis-store:/data
+    ports:
+      - ${LOCAL_IP}:6379:6379
+    networks:
+      - default
+      - app_network
+
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - ${LOCAL_IP}:8025:8025
     networks:
       - default
       - app_network

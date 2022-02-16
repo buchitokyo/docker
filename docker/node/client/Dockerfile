@@ -1,10 +1,10 @@
 FROM node:14.18.0-alpine
 
-RUN mkdir -p /var/www/client
+RUN mkdir -p /var/www/nuxt/client
 # # timezone
 ARG TZ
-WORKDIR /var/www/client
-COPY ./src/client/ /var/www/client
+WORKDIR /var/www/nuxt/client
+COPY ./src/nuxt/client/ /var/www/nuxt/client
 
 RUN apk update && \
     apk add --no-cache make gcc g++ python
