@@ -73,6 +73,21 @@ services:
       - default
       - app_network
 
+  db-test:
+    platform: linux/x86_64
+    image: mysql:8.0.28
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - TZ=${TZ}
+    ports:
+      - ${LOCAL_IP}:3300:3306
+    networks:
+      - default
+      - app_network
+
   front_app:
     build:
       # context: .
