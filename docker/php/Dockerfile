@@ -13,8 +13,8 @@ RUN apk add --no-cache bash wget
 
 # npm yarn nodejs
 RUN apk add --no-cache yarn npm nodejs
-RUN npm install -g @vue/cli
-  # npm install -g npm@latest \
+RUN npm install -g @vue/cli \
+  npm install -g npm@latest
 
 RUN set -eux && \
   apk --no-cache update &&\

@@ -1,10 +1,10 @@
 FROM node:14.18.0-alpine
 
-RUN mkdir -p /var/www/nuxt/admin
+RUN mkdir -p /var/www/next/admin
 # # timezone
 ARG TZ
-WORKDIR /var/www/nuxt/admin
-COPY ./src/nuxt/admin/ /var/www/nuxt/admin
+WORKDIR /var/www/next/admin
+COPY ./src/next/admin/ /var/www/next/admin
 
 RUN apk update && \
     apk add --no-cache make gcc g++ python
