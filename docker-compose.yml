@@ -77,52 +77,52 @@ services:
     platform: linux/x86_64
     image: mysql:8.0.28
     environment:
-      - MYSQL_DATABASE=${DB_DATABASE}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_TEST_DATABASE}
+      - MYSQL_USER=${DB_TEST_USER}
+      - MYSQL_PASSWORD=${DB_TEST_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_TEST_PASS}
       - TZ=${TZ}
     ports:
-      - ${LOCAL_IP}:3300:3306
+      - ${LOCAL_IP}:${DB_TEST_PORT}:3306
     networks:
       - default
       - app_network
 
-  front_app:
-    build:
-      # context: .
-      dockerfile: ./docker/node/client/Dockerfile
-      args:
-        - TZ=${TZ}
-    volumes:
-      - ./src/next/client:/var/www/next/client
-    ports:
-      - ${LOCAL_IP}:3000:3000
-    links:
-      - web
-    depends_on:
-      - web
-    networks:
-      - default
-      - app_network
+  # front_app:
+  #   build:
+  #     context: ./docker/node/client
+  #     # dockerfile: ./docker/node/client/Dockerfile
+  #     args:
+  #       - TZ=${TZ}
+  #   volumes:
+  #     - ./src/next/client:/var/www/next/client
+  #   ports:
+  #     - ${LOCAL_IP}:3000:3000
+  #   links:
+  #     - web
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     - default
+  #     - app_network
 
-  admin_front_app:
-    build:
-      # context: .
-      dockerfile: ./docker/node/admin/Dockerfile
-      args:
-        - TZ=${TZ}
-    volumes:
-      - ./src/next/admin:/var/www/next/admin
-    ports:
-      - ${LOCAL_IP}:3001:3001
-    links:
-      - web
-    depends_on:
-      - web
-    networks:
-      - default
-      - app_network
+  # admin_front_app:
+  #   build:
+  #     context: ./docker/node/admin
+  #     # dockerfile: ./docker/node/admin/Dockerfile
+  #     args:
+  #       - TZ=${TZ}
+  #   volumes:
+  #     - ./src/next/admin:/var/www/next/admin
+  #   ports:
+  #     - ${LOCAL_IP}:3001:3001
+  #   links:
+  #     - web
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     - default
+  #     - app_network
 
   redis:
     image: redis:6.2-alpine3.15
@@ -142,6 +142,25 @@ services:
       - default
       - app_network
 
+  minio:
+    image: minio/minio:latest
+    environment:
+        MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID}
+        MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
+    entrypoint: bash
+    # command: -c "/opt/bin/minio server /export --address :9999 --console-address :9001"
+    command: -c "
+      mkdir -p /data/.minio.sys/buckets;
+      cp -r /policies/* /data/.minio.sys/;
+      cp -r /export/* /data/;
+      /opt/bin/minio server /data --console-address :9001"
+    volumes:
+        - ./docker/minio/export:/export
+        - ./docker/minio/policies:/policies
+    ports:
+        - ${LOCAL_IP}:9000:9000
+        - ${LOCAL_IP}:9001:9001
+
 networks:
   app_network:
     external: true
@@ -152,4 +171,6 @@ volumes:
   db-store:
     driver: local
   redis-store:
+    driver: local
+  minio-data:
     driver: local
