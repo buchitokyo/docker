@@ -78,9 +78,9 @@ services:
     image: mysql:8.0.28
     environment:
       - MYSQL_DATABASE=${DB_TEST_DATABASE}
-      - MYSQL_USER=${DB_TEST_USER}
-      - MYSQL_PASSWORD=${DB_TEST_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_TEST_PASS}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
       - TZ=${TZ}
     ports:
       - ${LOCAL_IP}:${DB_TEST_PORT}:3306
