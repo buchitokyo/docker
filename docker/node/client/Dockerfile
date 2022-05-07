@@ -1,7 +1,7 @@
 FROM node:14.18.0-alpine
 
 RUN mkdir -p /var/www/next/client
-# # timezone
+# timezone
 ARG TZ
 WORKDIR /var/www/next/client
 COPY ./src/next/client/ /var/www/next/client

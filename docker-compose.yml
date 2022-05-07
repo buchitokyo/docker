@@ -29,15 +29,15 @@ services:
     depends_on:
       - db
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   web:
     build:
       context: ./docker/nginx
     ports:
       - ${LOCAL_IP}:8000:8000
-      - ${LOCAL_IP}:8080:8080
+
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/nginx
@@ -51,8 +51,10 @@ services:
     depends_on:
       - app
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
+        aliases:
+          - enhance-dev
 
   db:
     platform: linux/x86_64
@@ -70,8 +72,8 @@ services:
     ports:
       - ${LOCAL_IP}:3306:3306
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   db-test:
     platform: linux/x86_64
@@ -85,8 +87,8 @@ services:
     ports:
       - ${LOCAL_IP}:${DB_TEST_PORT}:3306
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   # front_app:
   #   build:
@@ -95,27 +97,9 @@ services:
   #     args:
   #       - TZ=${TZ}
   #   volumes:
-  #     - ./src/next/client:/var/www/next/client
+  #     - ./src/client:/var/www/client
   #   ports:
   #     - ${LOCAL_IP}:3000:3000
-  #   links:
-  #     - web
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - default
-  #     - app_network
-
-  # admin_front_app:
-  #   build:
-  #     context: ./docker/node/admin
-  #     # dockerfile: ./docker/node/admin/Dockerfile
-  #     args:
-  #       - TZ=${TZ}
-  #   volumes:
-  #     - ./src/next/admin:/var/www/next/admin
-  #   ports:
-  #     - ${LOCAL_IP}:3001:3001
   #   links:
   #     - web
   #   depends_on:
@@ -131,16 +115,16 @@ services:
     ports:
       - ${LOCAL_IP}:6379:6379
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   mail:
     image: mailhog/mailhog
     ports:
       - ${LOCAL_IP}:8025:8025
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   minio:
     image: minio/minio:latest
@@ -160,6 +144,9 @@ services:
     ports:
         - ${LOCAL_IP}:9000:9000
         - ${LOCAL_IP}:9001:9001
+    networks:
+      default:
+      app_network:
 
 networks:
   app_network:
