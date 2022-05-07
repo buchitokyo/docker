@@ -26,17 +26,16 @@ services:
       - php-fpm-socket:/var/run/php-fpm
     tty: true
     working_dir: /var/www
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   web:
     build:
       context: ./docker/nginx
     ports:
-      - ${LOCAL_IP}:8000:8000
       - ${LOCAL_IP}:8080:8080
     volumes:
       - ./src:/var/www
@@ -51,115 +50,10 @@ services:
     depends_on:
       - app
     networks:
-      - default
-      - app_network
-
-  db:
-    platform: linux/x86_64
-    image: mysql:8.0.28
-    volumes:
-      - db-store:/var/lib/mysql
-      - ./logs:/var/log/mysql
-      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-    environment:
-      - MYSQL_DATABASE=${DB_DATABASE}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_PASS}
-      - TZ=${TZ}
-    ports:
-      - ${LOCAL_IP}:3306:3306
-    networks:
-      - default
-      - app_network
-
-  db-test:
-    platform: linux/x86_64
-    image: mysql:8.0.28
-    environment:
-      - MYSQL_DATABASE=${DB_TEST_DATABASE}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_PASS}
-      - TZ=${TZ}
-    ports:
-      - ${LOCAL_IP}:${DB_TEST_PORT}:3306
-    networks:
-      - default
-      - app_network
-
-  # front_app:
-  #   build:
-  #     context: ./docker/node/client
-  #     # dockerfile: ./docker/node/client/Dockerfile
-  #     args:
-  #       - TZ=${TZ}
-  #   volumes:
-  #     - ./src/next/client:/var/www/next/client
-  #   ports:
-  #     - ${LOCAL_IP}:3000:3000
-  #   links:
-  #     - web
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - default
-  #     - app_network
-
-  # admin_front_app:
-  #   build:
-  #     context: ./docker/node/admin
-  #     # dockerfile: ./docker/node/admin/Dockerfile
-  #     args:
-  #       - TZ=${TZ}
-  #   volumes:
-  #     - ./src/next/admin:/var/www/next/admin
-  #   ports:
-  #     - ${LOCAL_IP}:3001:3001
-  #   links:
-  #     - web
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - default
-  #     - app_network
-
-  redis:
-    image: redis:6.2-alpine3.15
-    volumes:
-      - redis-store:/data
-    ports:
-      - ${LOCAL_IP}:6379:6379
-    networks:
-      - default
-      - app_network
-
-  mail:
-    image: mailhog/mailhog
-    ports:
-      - ${LOCAL_IP}:8025:8025
-    networks:
-      - default
-      - app_network
-
-  minio:
-    image: minio/minio:latest
-    environment:
-        MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID}
-        MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
-    entrypoint: bash
-    # command: -c "/opt/bin/minio server /export --address :9999 --console-address :9001"
-    command: -c "
-      mkdir -p /data/.minio.sys/buckets;
-      cp -r /policies/* /data/.minio.sys/;
-      cp -r /export/* /data/;
-      /opt/bin/minio server /data --console-address :9001"
-    volumes:
-        - ./docker/minio/export:/export
-        - ./docker/minio/policies:/policies
-    ports:
-        - ${LOCAL_IP}:9000:9000
-        - ${LOCAL_IP}:9001:9001
+      default:
+      app_network:
+        aliases:
+          - admin.enhance-dev
 
 networks:
   app_network:
@@ -174,3 +68,95 @@ volumes:
     driver: local
   minio-data:
     driver: local
+
+  # db:
+  #   platform: linux/x86_64
+  #   image: mysql:8.0.28
+  #   volumes:
+  #     - db-store:/var/lib/mysql
+  #     - ./logs:/var/log/mysql
+  #     - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+  #   environment:
+  #     - MYSQL_DATABASE=${DB_DATABASE}
+  #     - MYSQL_USER=${DB_USER}
+  #     - MYSQL_PASSWORD=${DB_PASS}
+  #     - MYSQL_ROOT_PASSWORD=${DB_PASS}
+  #     - TZ=${TZ}
+  #   ports:
+  #     - ${LOCAL_IP}:3306:3306
+  #   networks:
+  #     default:
+  #     app_network:
+
+  # db-test:
+  #   platform: linux/x86_64
+  #   image: mysql:8.0.28
+  #   environment:
+  #     - MYSQL_DATABASE=${DB_TEST_DATABASE}
+  #     - MYSQL_USER=${DB_USER}
+  #     - MYSQL_PASSWORD=${DB_PASS}
+  #     - MYSQL_ROOT_PASSWORD=${DB_PASS}
+  #     - TZ=${TZ}
+  #   ports:
+  #     - ${LOCAL_IP}:${DB_TEST_PORT}:3306
+  #   networks:
+  #     default:
+  #     app_network:
+
+  # front_app:
+  #   build:
+  #     context: ./docker/node/client
+  #     # dockerfile: ./docker/node/client/Dockerfile
+  #     args:
+  #       - TZ=${TZ}
+  #   volumes:
+  #     - ./src/next/client:/var/www/next/client
+  #   ports:
+  #     - ${LOCAL_IP}:3001:3001
+  #   links:
+  #     - web
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     default:
+  #     app_network:
+
+  # redis:
+  #   image: redis:6.2-alpine3.15
+  #   volumes:
+  #     - redis-store:/data
+  #   ports:
+  #     - ${LOCAL_IP}:6380:6379
+  #   networks:
+  #     default:
+  #     app_network:
+
+  # mail:
+  #   image: mailhog/mailhog
+  #   ports:
+  #     - ${LOCAL_IP}:8026:8025
+  #   networks:
+  #     default:
+  #     app_network:
+
+  # minio:
+  #   image: minio/minio:latest
+  #   environment:
+  #       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID}
+  #       MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
+  #   entrypoint: bash
+  #   # command: -c "/opt/bin/minio server /export --address :9999 --console-address :9001"
+  #   command: -c "
+  #     mkdir -p /data/.minio.sys/buckets;
+  #     cp -r /policies/* /data/.minio.sys/;
+  #     cp -r /export/* /data/;
+  #     /opt/bin/minio server /data --console-address :9001"
+  #   volumes:
+  #       - ./docker/minio/export:/export
+  #       - ./docker/minio/policies:/policies
+  #   ports:
+  #       - ${LOCAL_IP}:9002:9000
+  #       - ${LOCAL_IP}:9003:9001
+  #   networks:
+  #     default:
+  #     app_network:
