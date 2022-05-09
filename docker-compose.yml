@@ -3,7 +3,8 @@ version: '3.9'
 services:
   app:
     build:
-      context: ./docker/php
+      context: .
+      dockerfile: ./docker/php/Dockerfile
       args:
         - TZ=${TZ}
         - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
@@ -34,7 +35,8 @@ services:
 
   web:
     build:
-      context: ./docker/nginx
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
     ports:
       - ${LOCAL_IP}:8000:8000
 
@@ -90,23 +92,24 @@ services:
       default:
       app_network:
 
-  # front_app:
-  #   build:
-  #     context: ./docker/node/client
-  #     # dockerfile: ./docker/node/client/Dockerfile
-  #     args:
-  #       - TZ=${TZ}
-  #   volumes:
-  #     - ./src/client:/var/www/client
-  #   ports:
-  #     - ${LOCAL_IP}:3000:3000
-  #   links:
-  #     - web
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - default
-  #     - app_network
+  front_app:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+      args:
+        - TZ=${TZ}
+    volumes:
+      - ./src/client:/var/www/client
+    ports:
+      - ${LOCAL_IP}:3000:3000
+    tty: true
+    links:
+      - web
+    depends_on:
+      - web
+    networks:
+      - default
+      - app_network
 
   redis:
     image: redis:6.2-alpine3.15
