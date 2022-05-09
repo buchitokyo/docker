@@ -13,4 +13,4 @@ RUN yarn install
 
 EXPOSE 3001
 
-# ENTRYPOINT ["yarn", "run", "dev"]
+ENTRYPOINT ["yarn", "run", "dev"]
