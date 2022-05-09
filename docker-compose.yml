@@ -1,40 +1,29 @@
 version: '3.9'
 
 services:
-  app:
+  front_app:
     build:
-      context: ./docker/php
+      context: .
+      dockerfile: ./docker/node/Dockerfile
       args:
         - TZ=${TZ}
-        - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USER}
-      - DB_PASSWORD=${DB_PASS}
-      - TZ=${TZ}
-      - CACHE_DRIVER=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_DRIVER=redis
-      - REDIS_HOST=redis
     volumes:
-      - ./src:/var/www
-      - ./logs:/var/log/php
-      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
-      - ./docker/php/php-fpm.d/zzz-www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
-      - php-fpm-socket:/var/run/php-fpm
+      - ./src/client:/var/www/client
+    ports:
+      - ${LOCAL_IP}:3001:3001
     tty: true
-    working_dir: /var/www
-    # depends_on:
-    #   - db
+    links:
+      - web
+    depends_on:
+      - web
     networks:
-      default:
-      app_network:
+      - default
+      - app_network
 
   web:
     build:
-      context: ./docker/nginx
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
     ports:
       - ${LOCAL_IP}:8080:8080
     volumes:
@@ -45,10 +34,10 @@ services:
       - php-fpm-socket:/var/run/php-fpm
     environment:
       - TZ=${TZ}
-    links:
-      - app
-    depends_on:
-      - app
+    # links:
+    #   - app
+    # depends_on:
+    #   - app
     networks:
       default:
       app_network:
@@ -62,12 +51,44 @@ networks:
 volumes:
   php-fpm-socket:
     driver: local
-  db-store:
-    driver: local
-  redis-store:
-    driver: local
-  minio-data:
-    driver: local
+  # db-store:
+  #   driver: local
+  # redis-store:
+  #   driver: local
+  # minio-data:
+  #   driver: local
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/php/Dockerfile
+  #     args:
+  #       - TZ=${TZ}
+  #       - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
+  #   environment:
+  #     - DB_CONNECTION=mysql
+  #     - DB_HOST=db
+  #     - DB_DATABASE=${DB_DATABASE}
+  #     - DB_USERNAME=${DB_USER}
+  #     - DB_PASSWORD=${DB_PASS}
+  #     - TZ=${TZ}
+  #     - CACHE_DRIVER=redis
+  #     - SESSION_DRIVER=redis
+  #     - QUEUE_DRIVER=redis
+  #     - REDIS_HOST=redis
+  #   volumes:
+  #     - ./src:/var/www
+  #     - ./logs:/var/log/php
+  #     - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+  #     - ./docker/php/php-fpm.d/zzz-www.conf:/usr/local/etc/php-fpm.d/zzz-www.conf
+  #     - php-fpm-socket:/var/run/php-fpm
+  #   tty: true
+  #   working_dir: /var/www
+  #   # depends_on:
+  #   #   - db
+  #   networks:
+  #     default:
+  #     app_network:
 
   # db:
   #   platform: linux/x86_64
@@ -105,12 +126,12 @@ volumes:
 
   # front_app:
   #   build:
-  #     context: ./docker/node/client
-  #     # dockerfile: ./docker/node/client/Dockerfile
-  #     args:
-  #       - TZ=${TZ}
+  #   context: .
+  #   dockerfile: ./docker/node/Dockerfile
+  #   args:
+  #     - TZ=${TZ}
   #   volumes:
-  #     - ./src/next/client:/var/www/next/client
+  #     - ./src/client:/var/www/client
   #   ports:
   #     - ${LOCAL_IP}:3001:3001
   #   links:
