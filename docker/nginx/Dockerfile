@@ -14,7 +14,7 @@ ARG GID=82
 RUN useradd -u $UID -o -m www-data
 RUN groupmod -g $GID -o www-data
 RUN echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1
+  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1;
 
 RUN mkdir -p /var/cache/nginx
 RUN touch /var/run/nginx.pid \ && \

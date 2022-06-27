@@ -117,6 +117,7 @@ WORKDIR /var/www
 ARG UID=82
 ARG GID=82
 RUN set -ex && apk --no-cache add sudo
+# RUN apk --no-cache add shadow *shadow that brings useradd & usermod.
 RUN echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
   echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1
 
