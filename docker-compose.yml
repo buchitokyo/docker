@@ -11,6 +11,7 @@ services:
       - ./src/client:/var/www/client
     ports:
       - ${LOCAL_IP}:3001:3001
+      - ${LOCAL_IP}:16006:6006
     tty: true
     links:
       - web
