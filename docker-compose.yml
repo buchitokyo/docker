@@ -39,7 +39,6 @@ services:
       dockerfile: ./docker/nginx/Dockerfile
     ports:
       - ${LOCAL_IP}:8000:8000
-
     volumes:
       - ./src:/var/www
       - ./logs:/var/log/nginx

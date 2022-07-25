@@ -117,9 +117,10 @@ WORKDIR /var/www
 ARG UID=82
 ARG GID=82
 RUN set -ex && apk --no-cache add sudo
-# RUN apk --no-cache add shadow *shadow that brings useradd & usermod.
+# *shadow that brings useradd & usermod. usermod -aG www-data nginx
+RUN apk --no-cache add shadow && usermod -u $UID www-data && groupmod -g $GID www-data
 RUN echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1
+  echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1;
 
 RUN mkdir /home/www-data/.ssh/ && \
    echo "${SSH_PRIVATE_KEY}" > /home/www-data/.ssh/id_rsa && \

@@ -16,11 +16,17 @@ RUN groupmod -g $GID -o www-data
 RUN echo "www-data ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
   echo 'www-data:www-data' | chpasswd && exit 0 ; exit 1;
 
+# might be better to comment out here!?
 RUN mkdir -p /var/cache/nginx
 RUN touch /var/run/nginx.pid \ && \
   chmod 755 /var/run/nginx.pid  && \
   chown -R 82:www-data /var/run/nginx.pid && \
   chown -R 82:www-data /var/cache/nginx
+
+# if nginx is worked by www-data CMD remove sudo
+# RUN mkdir -p /var/lib/nginx/tmp /var/log/nginx \
+#     && chown -R 82:www-data /var/lib/nginx /var/log/nginx \
+#     && chmod -R 755 /var/lib/nginx /var/log/nginx
 
 USER www-data
 
