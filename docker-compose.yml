@@ -18,8 +18,10 @@ services:
     depends_on:
       - web
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
+        aliases:
+          - admin.enhance-dev
 
   web:
     build:
