@@ -111,6 +111,26 @@ services:
       - default
       - app_network
 
+  # admin_front_app:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/node/admin_client/Dockerfile
+  #     args:
+  #       - TZ=${TZ}
+  #   volumes:
+  #     - ./src/admin_client:/var/www/admin_client
+  #   ports:
+  #     - ${LOCAL_IP}:3003:3003
+  #     - ${LOCAL_IP}:19008:9008
+  #   tty: true
+  #   links:
+  #     - web
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     - default
+  #     - app_network
+
   redis:
     image: redis:6.2-alpine3.15
     volumes:
@@ -147,6 +167,17 @@ services:
     ports:
         - ${LOCAL_IP}:9000:9000
         - ${LOCAL_IP}:9001:9001
+    networks:
+      default:
+      app_network:
+
+  supervisor:
+    build:
+      context: .
+      dockerfile: ./docker/supervisor/Dockerfile
+    # container_name: supervisor
+    volumes:
+      - ./src:/var/www
     networks:
       default:
       app_network:
