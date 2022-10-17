@@ -28,6 +28,11 @@ RUN touch /var/run/nginx.pid \ && \
 #     && chown -R 82:www-data /var/lib/nginx /var/log/nginx \
 #     && chmod -R 755 /var/lib/nginx /var/log/nginx
 
+# Basic Auth
+# COPY ./docker/nginx/gen_htpassword /etc/nginx
+# RUN chmod 755 /etc/nginx/gen_htpassword
+# RUN /etc/nginx/gen_htpassword
+
 USER www-data
 
 CMD ["sudo", "nginx", "-g", "daemon off;"]
