@@ -47,8 +47,8 @@ services:
       - php-fpm-socket:/var/run/php-fpm
     environment:
       - TZ=${TZ}
-    links:
-      - app
+    # links:
+    #   - app
     depends_on:
       - app
     networks:
