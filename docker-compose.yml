@@ -64,6 +64,7 @@ services:
       - db-store:/var/lib/mysql
       - ./logs:/var/log/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USER}
@@ -103,13 +104,13 @@ services:
       - ${LOCAL_IP}:3000:3000
       - ${LOCAL_IP}:19009:9009
     tty: true
-    links:
-      - web
+    # links:
+    #   - web
     depends_on:
       - web
     networks:
-      - default
-      - app_network
+      default:
+      app_network:
 
   # admin_front_app:
   #   build:
